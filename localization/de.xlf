@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+  <file target-language="de" source-language="en" original="lit-localize-inputs" datatype="plaintext">
+    <body>
+<trans-unit id="sa87cdce68f48bb37">
+  <source>This plugin replaces IEDs with a template, transferring ExtRef elements.</source>
+</trans-unit>
+<trans-unit id="sccc93d961fd5c830">
+  <source>It assumes the data models are compatible.</source>
+</trans-unit>
+<trans-unit id="s5e8250fb85d64c23">
+  <source>Close</source>
+</trans-unit>
+<trans-unit id="sb8f855b49234b81b">
+  <source>Apply</source>
+</trans-unit>
+    </body>
+  </file>
+</xliff>
