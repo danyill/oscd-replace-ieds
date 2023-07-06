@@ -91,7 +91,7 @@ export default class ReplaceIEDs extends LitElement {
 
         const storedInputSection: storedInput = {
           id: `${identity(inputSection.parentElement)}`,
-          input: <Element>inputSection.cloneNode(true),
+          input: <Element>this.doc.importNode(inputSection, true),
         };
 
         if (inputsSections.has(currentIedName!)) {
@@ -110,20 +110,20 @@ export default class ReplaceIEDs extends LitElement {
       const editActions: (Remove | Insert)[] = [];
 
       const newIed = <Element>this.selectedIed?.cloneNode(true);
-      newIed.setAttribute(
-        'name',
-        this.selectedIed!.getAttribute('name') ?? 'Unknown'
-      );
+      newIed.setAttribute('name', currentIedName);
 
       const removeIed: Remove = { node: currentIed };
       editActions.push(removeIed);
 
       const insertIed: Insert = {
-        parent: this.selectedIed!.ownerDocument.getRootNode(),
+        parent: this.doc.documentElement,
         node: newIed,
         reference: currentIed.previousElementSibling,
       };
       editActions.push(insertIed);
+      this.dispatchEvent(newEditEvent(editActions));
+
+      const inputActions: (Remove | Insert)[] = [];
 
       inputsSections.get(currentIedName)!.forEach(transferInput => {
         // eslint-disable-next-line no-shadow
@@ -131,14 +131,19 @@ export default class ReplaceIEDs extends LitElement {
         const lN =
           this.doc.querySelector(selector('LN', <string>id)) ??
           this.doc.querySelector(selector('LN0', <string>id));
-        editActions.push({
-          parent: <Element>lN,
-          node: input,
-          reference: null,
-        });
+        if (lN) {
+          inputActions.push({
+            node: lN.querySelector('Inputs')!,
+          });
+          inputActions.push({
+            parent: <Element>lN,
+            node: input,
+            reference: lN.querySelector('Inputs')!.nextElementSibling,
+          });
+        }
       });
 
-      this.dispatchEvent(newEditEvent([editActions]));
+      this.dispatchEvent(newEditEvent(inputActions));
     });
 
     // console.log(inputSection);
