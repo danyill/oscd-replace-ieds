@@ -11004,7 +11004,7 @@ class ReplaceIEDs extends s$1 {
                 const currentIedName = currentIed.getAttribute('name');
                 const storedInputSection = {
                     id: `${identity(inputSection.parentElement)}`,
-                    input: inputSection.cloneNode(true),
+                    input: this.doc.importNode(inputSection, true),
                 };
                 if (inputsSections.has(currentIedName)) {
                     inputsSections.get(currentIedName).push(storedInputSection);
@@ -11015,33 +11015,40 @@ class ReplaceIEDs extends s$1 {
             });
         });
         selected.forEach(iedListItem => {
-            var _a, _b;
+            var _a;
             const { id } = iedListItem.dataset;
             const currentIed = this.doc.querySelector(selector('IED', id));
             const currentIedName = currentIed.getAttribute('name');
             const editActions = [];
             const newIed = (_a = this.selectedIed) === null || _a === void 0 ? void 0 : _a.cloneNode(true);
-            newIed.setAttribute('name', (_b = this.selectedIed.getAttribute('name')) !== null && _b !== void 0 ? _b : 'Unknown');
+            newIed.setAttribute('name', currentIedName);
             const removeIed = { node: currentIed };
             editActions.push(removeIed);
             const insertIed = {
-                parent: this.selectedIed.ownerDocument.getRootNode(),
+                parent: this.doc.documentElement,
                 node: newIed,
                 reference: currentIed.previousElementSibling,
             };
             editActions.push(insertIed);
+            this.dispatchEvent(newEditEvent(editActions));
+            const inputActions = [];
             inputsSections.get(currentIedName).forEach(transferInput => {
                 var _a;
                 // eslint-disable-next-line no-shadow
                 const { id, input } = transferInput;
                 const lN = (_a = this.doc.querySelector(selector('LN', id))) !== null && _a !== void 0 ? _a : this.doc.querySelector(selector('LN0', id));
-                editActions.push({
-                    parent: lN,
-                    node: input,
-                    reference: null,
-                });
+                if (lN) {
+                    inputActions.push({
+                        node: lN.querySelector('Inputs'),
+                    });
+                    inputActions.push({
+                        parent: lN,
+                        node: input,
+                        reference: lN.querySelector('Inputs').nextElementSibling,
+                    });
+                }
             });
-            this.dispatchEvent(newEditEvent([editActions]));
+            this.dispatchEvent(newEditEvent(inputActions));
         });
         // console.log(inputSection);
     }
