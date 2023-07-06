@@ -159,7 +159,7 @@ export default class ReplaceIEDs extends LitElement {
       const inputActions: (Remove | Insert)[] = [];
 
       // remove and replace input sections
-      inputsSections.get(currentIedName)!.forEach(transferInput => {
+      inputsSections.get(currentIedName)?.forEach(transferInput => {
         // eslint-disable-next-line no-shadow
         const { id, input } = transferInput;
         const lN =
@@ -177,7 +177,7 @@ export default class ReplaceIEDs extends LitElement {
         }
       });
 
-      gseControlSections.get(currentIedName)!.forEach(transferInput => {
+      gseControlSections.get(currentIedName)?.forEach(transferInput => {
         // eslint-disable-next-line no-shadow
         const { id, input } = transferInput;
         const lN0 = <Element>this.doc.querySelector(selector('LN0', id));
@@ -195,7 +195,7 @@ export default class ReplaceIEDs extends LitElement {
         });
       });
 
-      dataSetSections.get(currentIedName)!.forEach(transferInput => {
+      dataSetSections.get(currentIedName)?.forEach(transferInput => {
         // eslint-disable-next-line no-shadow
         const { id, input } = transferInput;
         const lN0 = <Element>this.doc.querySelector(selector('LN0', id));
