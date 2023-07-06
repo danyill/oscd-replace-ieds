@@ -11062,27 +11062,24 @@ class ReplaceIEDs extends s$1 {
                     });
                 }
             });
-            // remove and replace GSEControl sections
-            const lN = this.doc.querySelector(selector('IED', id));
-            if (lN) {
-                const gseControls = lN.querySelectorAll('GSEControl');
-                if (gseControls)
-                    Array.from(gseControls).forEach(gseControl => {
-                        inputActions.push({
-                            node: gseControl,
-                        });
-                    });
-                gseControlSections.get(currentIedName).forEach(transferInput => {
-                    // eslint-disable-next-line no-shadow
-                    const { input } = transferInput;
-                    // id
+            const gseControls = currentIed.querySelectorAll('GSEControl');
+            let lastGse;
+            if (gseControls)
+                Array.from(gseControls).forEach(gseControl => {
                     inputActions.push({
-                        parent: lN,
-                        node: input,
-                        reference: Array.from(gseControls)[-1],
+                        node: gseControl,
                     });
+                    lastGse = gseControl;
                 });
-            }
+            gseControlSections.get(currentIedName).forEach(transferInput => {
+                // eslint-disable-next-line no-shadow
+                const { id, input } = transferInput;
+                inputActions.push({
+                    parent: this.doc.querySelector(selector('LN0', id)),
+                    node: input,
+                    reference: lastGse.nextElementSibling,
+                });
+            });
             this.dispatchEvent(newEditEvent(inputActions));
         });
     }
