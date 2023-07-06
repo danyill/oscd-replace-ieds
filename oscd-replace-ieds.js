@@ -10998,6 +10998,7 @@ class ReplaceIEDs extends s$1 {
             return;
         const inputsSections = new Map();
         const gseControlSections = new Map();
+        const dataSetSections = new Map();
         selected.forEach(iedListItem => {
             const { id } = iedListItem.dataset;
             const currentIed = this.doc.querySelector(selector('IED', id));
@@ -11024,6 +11025,18 @@ class ReplaceIEDs extends s$1 {
                 }
                 else {
                     gseControlSections.set(currentIedName, [storedGSEControl]);
+                }
+            });
+            Array.from(currentIed.querySelectorAll(':scope LN0 > DataSet')).forEach(ds => {
+                const storedDs = {
+                    id: `${identity(ds.parentElement)}`,
+                    input: this.doc.importNode(ds, true),
+                };
+                if (dataSetSections.has(currentIedName)) {
+                    dataSetSections.get(currentIedName).push(storedDs);
+                }
+                else {
+                    dataSetSections.set(currentIedName, [storedDs]);
                 }
             });
         });
@@ -11062,22 +11075,32 @@ class ReplaceIEDs extends s$1 {
                     });
                 }
             });
-            const gseControls = currentIed.querySelectorAll('GSEControl');
-            let lastGse;
-            if (gseControls)
-                Array.from(gseControls).forEach(gseControl => {
-                    inputActions.push({
-                        node: gseControl,
-                    });
-                    lastGse = gseControl;
-                });
             gseControlSections.get(currentIedName).forEach(transferInput => {
                 // eslint-disable-next-line no-shadow
                 const { id, input } = transferInput;
+                const lN0 = this.doc.querySelector(selector('LN0', id));
+                lN0.querySelectorAll(':scope > GSEControl').forEach(gseControl => inputActions.push({
+                    node: gseControl,
+                }));
                 inputActions.push({
-                    parent: this.doc.querySelector(selector('LN0', id)),
+                    parent: lN0,
                     node: input,
-                    reference: lastGse.nextElementSibling,
+                    reference: Array.from(lN0.querySelectorAll('GSEControl')).slice(-1)[0]
+                        .nextElementSibling,
+                });
+            });
+            dataSetSections.get(currentIedName).forEach(transferInput => {
+                // eslint-disable-next-line no-shadow
+                const { id, input } = transferInput;
+                const lN0 = this.doc.querySelector(selector('LN0', id));
+                lN0.querySelectorAll(':scope > DataSet').forEach(ds => inputActions.push({
+                    node: ds,
+                }));
+                inputActions.push({
+                    parent: lN0,
+                    node: input,
+                    reference: Array.from(lN0.querySelectorAll('DataSet')).slice(-1)[0]
+                        .nextElementSibling,
                 });
             });
             this.dispatchEvent(newEditEvent(inputActions));
