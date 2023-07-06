@@ -80,6 +80,7 @@ export default class ReplaceIEDs extends LitElement {
 
     const inputsSections = new Map<string, [storedInput]>();
     const gseControlSections = new Map<string, [storedInput]>();
+    const dataSetSections = new Map<string, [storedInput]>();
 
     selected.forEach(iedListItem => {
       const { id } = iedListItem!.dataset;
@@ -117,6 +118,21 @@ export default class ReplaceIEDs extends LitElement {
           gseControlSections.set(currentIedName!, [storedGSEControl]);
         }
       });
+
+      Array.from(currentIed.querySelectorAll(':scope LN0 > DataSet')).forEach(
+        ds => {
+          const storedDs: storedInput = {
+            id: `${identity(ds.parentElement)}`,
+            input: <Element>this.doc.importNode(ds, true),
+          };
+
+          if (dataSetSections.has(currentIedName!)) {
+            dataSetSections.get(currentIedName)!.push(storedDs);
+          } else {
+            dataSetSections.set(currentIedName!, [storedDs]);
+          }
+        }
+      );
     });
 
     selected.forEach(iedListItem => {
@@ -161,26 +177,39 @@ export default class ReplaceIEDs extends LitElement {
         }
       });
 
-      const gseControls = currentIed.querySelectorAll('GSEControl');
-
-      let lastGse: Element;
-
-      if (gseControls)
-        Array.from(gseControls).forEach(gseControl => {
-          inputActions.push({
-            node: gseControl!,
-          });
-          lastGse = gseControl;
-        });
-
       gseControlSections.get(currentIedName)!.forEach(transferInput => {
         // eslint-disable-next-line no-shadow
         const { id, input } = transferInput;
+        const lN0 = <Element>this.doc.querySelector(selector('LN0', id));
+        lN0.querySelectorAll(':scope > GSEControl').forEach(gseControl =>
+          inputActions.push({
+            node: gseControl!,
+          })
+        );
 
         inputActions.push({
-          parent: <Element>this.doc.querySelector(selector('LN0', id)),
+          parent: lN0,
           node: input,
-          reference: lastGse.nextElementSibling,
+          reference: Array.from(lN0.querySelectorAll('GSEControl')).slice(-1)[0]
+            .nextElementSibling,
+        });
+      });
+
+      dataSetSections.get(currentIedName)!.forEach(transferInput => {
+        // eslint-disable-next-line no-shadow
+        const { id, input } = transferInput;
+        const lN0 = <Element>this.doc.querySelector(selector('LN0', id));
+        lN0.querySelectorAll(':scope > DataSet').forEach(ds =>
+          inputActions.push({
+            node: ds!,
+          })
+        );
+
+        inputActions.push({
+          parent: lN0,
+          node: input,
+          reference: Array.from(lN0.querySelectorAll('DataSet')).slice(-1)[0]
+            .nextElementSibling,
         });
       });
 
