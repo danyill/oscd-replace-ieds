@@ -14,6 +14,9 @@
 <trans-unit id="sb8f855b49234b81b">
   <source>Apply</source>
 </trans-unit>
+<trans-unit id="sa3f3173f7eb97f66">
+  <source>Replace IEDs</source>
+</trans-unit>
     </body>
   </file>
 </xliff>

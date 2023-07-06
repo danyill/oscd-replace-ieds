@@ -79,16 +79,18 @@ export default class ReplaceIEDs extends LitElement {
     if (!this.replaceIedsUI?.selected || !selected || !this.selectedIed) return;
 
     const inputsSections = new Map<string, [storedInput]>();
+    const gseControlSections = new Map<string, [storedInput]>();
 
     selected.forEach(iedListItem => {
       const { id } = iedListItem!.dataset;
 
       const currentIed = this.doc.querySelector(selector('IED', id!))!;
+
+      const currentIedName = currentIed.getAttribute('name')!;
+
       Array.from(
         currentIed.querySelectorAll(':scope LN > Inputs, :scope LN0 > Inputs')
       ).forEach(inputSection => {
-        const currentIedName = currentIed.getAttribute('name')!;
-
         const storedInputSection: storedInput = {
           id: `${identity(inputSection.parentElement)}`,
           input: <Element>this.doc.importNode(inputSection, true),
@@ -98,6 +100,21 @@ export default class ReplaceIEDs extends LitElement {
           inputsSections.get(currentIedName)!.push(storedInputSection);
         } else {
           inputsSections.set(currentIedName!, [storedInputSection]);
+        }
+      });
+
+      Array.from(
+        currentIed.querySelectorAll(':scope LN0 > GSEControl')
+      ).forEach(gseControl => {
+        const storedGSEControl: storedInput = {
+          id: `${identity(gseControl.parentElement)}`,
+          input: <Element>this.doc.importNode(gseControl, true),
+        };
+
+        if (gseControlSections.has(currentIedName!)) {
+          gseControlSections.get(currentIedName)!.push(storedGSEControl);
+        } else {
+          gseControlSections.set(currentIedName!, [storedGSEControl]);
         }
       });
     });
@@ -125,6 +142,7 @@ export default class ReplaceIEDs extends LitElement {
 
       const inputActions: (Remove | Insert)[] = [];
 
+      // remove and replace input sections
       inputsSections.get(currentIedName)!.forEach(transferInput => {
         // eslint-disable-next-line no-shadow
         const { id, input } = transferInput;
@@ -143,10 +161,31 @@ export default class ReplaceIEDs extends LitElement {
         }
       });
 
+      // remove and replace GSEControl sections
+      const lN = this.doc.querySelector(selector('IED', <string>id));
+      if (lN) {
+        const gseControls = lN.querySelectorAll('GSEControl');
+        if (gseControls)
+          Array.from(gseControls).forEach(gseControl => {
+            inputActions.push({
+              node: gseControl!,
+            });
+          });
+
+        gseControlSections.get(currentIedName)!.forEach(transferInput => {
+          // eslint-disable-next-line no-shadow
+          const { input } = transferInput;
+          // id
+
+          inputActions.push({
+            parent: <Element>lN,
+            node: input,
+            reference: Array.from(gseControls)[-1],
+          });
+        });
+      }
       this.dispatchEvent(newEditEvent(inputActions));
     });
-
-    // console.log(inputSection);
   }
 
   private renderIedSelector(): TemplateResult {
