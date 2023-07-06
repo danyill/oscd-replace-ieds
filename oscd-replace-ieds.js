@@ -10997,11 +10997,12 @@ class ReplaceIEDs extends s$1 {
         if (!((_d = this.replaceIedsUI) === null || _d === void 0 ? void 0 : _d.selected) || !selected || !this.selectedIed)
             return;
         const inputsSections = new Map();
+        const gseControlSections = new Map();
         selected.forEach(iedListItem => {
             const { id } = iedListItem.dataset;
             const currentIed = this.doc.querySelector(selector('IED', id));
+            const currentIedName = currentIed.getAttribute('name');
             Array.from(currentIed.querySelectorAll(':scope LN > Inputs, :scope LN0 > Inputs')).forEach(inputSection => {
-                const currentIedName = currentIed.getAttribute('name');
                 const storedInputSection = {
                     id: `${identity(inputSection.parentElement)}`,
                     input: this.doc.importNode(inputSection, true),
@@ -11011,6 +11012,18 @@ class ReplaceIEDs extends s$1 {
                 }
                 else {
                     inputsSections.set(currentIedName, [storedInputSection]);
+                }
+            });
+            Array.from(currentIed.querySelectorAll(':scope LN0 > GSEControl')).forEach(gseControl => {
+                const storedGSEControl = {
+                    id: `${identity(gseControl.parentElement)}`,
+                    input: this.doc.importNode(gseControl, true),
+                };
+                if (gseControlSections.has(currentIedName)) {
+                    gseControlSections.get(currentIedName).push(storedGSEControl);
+                }
+                else {
+                    gseControlSections.set(currentIedName, [storedGSEControl]);
                 }
             });
         });
@@ -11032,6 +11045,7 @@ class ReplaceIEDs extends s$1 {
             editActions.push(insertIed);
             this.dispatchEvent(newEditEvent(editActions));
             const inputActions = [];
+            // remove and replace input sections
             inputsSections.get(currentIedName).forEach(transferInput => {
                 var _a;
                 // eslint-disable-next-line no-shadow
@@ -11048,9 +11062,29 @@ class ReplaceIEDs extends s$1 {
                     });
                 }
             });
+            // remove and replace GSEControl sections
+            const lN = this.doc.querySelector(selector('IED', id));
+            if (lN) {
+                const gseControls = lN.querySelectorAll('GSEControl');
+                if (gseControls)
+                    Array.from(gseControls).forEach(gseControl => {
+                        inputActions.push({
+                            node: gseControl,
+                        });
+                    });
+                gseControlSections.get(currentIedName).forEach(transferInput => {
+                    // eslint-disable-next-line no-shadow
+                    const { input } = transferInput;
+                    // id
+                    inputActions.push({
+                        parent: lN,
+                        node: input,
+                        reference: Array.from(gseControls)[-1],
+                    });
+                });
+            }
             this.dispatchEvent(newEditEvent(inputActions));
         });
-        // console.log(inputSection);
     }
     renderIedSelector() {
         var _a, _b;
