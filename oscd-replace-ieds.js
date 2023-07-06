@@ -11041,7 +11041,7 @@ class ReplaceIEDs extends s$1 {
             });
         });
         selected.forEach(iedListItem => {
-            var _a;
+            var _a, _b, _c, _d;
             const { id } = iedListItem.dataset;
             const currentIed = this.doc.querySelector(selector('IED', id));
             const currentIedName = currentIed.getAttribute('name');
@@ -11059,7 +11059,7 @@ class ReplaceIEDs extends s$1 {
             this.dispatchEvent(newEditEvent(editActions));
             const inputActions = [];
             // remove and replace input sections
-            inputsSections.get(currentIedName).forEach(transferInput => {
+            (_b = inputsSections.get(currentIedName)) === null || _b === void 0 ? void 0 : _b.forEach(transferInput => {
                 var _a;
                 // eslint-disable-next-line no-shadow
                 const { id, input } = transferInput;
@@ -11075,7 +11075,7 @@ class ReplaceIEDs extends s$1 {
                     });
                 }
             });
-            gseControlSections.get(currentIedName).forEach(transferInput => {
+            (_c = gseControlSections.get(currentIedName)) === null || _c === void 0 ? void 0 : _c.forEach(transferInput => {
                 // eslint-disable-next-line no-shadow
                 const { id, input } = transferInput;
                 const lN0 = this.doc.querySelector(selector('LN0', id));
@@ -11089,7 +11089,7 @@ class ReplaceIEDs extends s$1 {
                         .nextElementSibling,
                 });
             });
-            dataSetSections.get(currentIedName).forEach(transferInput => {
+            (_d = dataSetSections.get(currentIedName)) === null || _d === void 0 ? void 0 : _d.forEach(transferInput => {
                 // eslint-disable-next-line no-shadow
                 const { id, input } = transferInput;
                 const lN0 = this.doc.querySelector(selector('LN0', id));
