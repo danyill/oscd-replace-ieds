@@ -161,29 +161,29 @@ export default class ReplaceIEDs extends LitElement {
         }
       });
 
-      // remove and replace GSEControl sections
-      const lN = this.doc.querySelector(selector('IED', <string>id));
-      if (lN) {
-        const gseControls = lN.querySelectorAll('GSEControl');
-        if (gseControls)
-          Array.from(gseControls).forEach(gseControl => {
-            inputActions.push({
-              node: gseControl!,
-            });
-          });
+      const gseControls = currentIed.querySelectorAll('GSEControl');
 
-        gseControlSections.get(currentIedName)!.forEach(transferInput => {
-          // eslint-disable-next-line no-shadow
-          const { input } = transferInput;
-          // id
+      let lastGse: Element;
 
+      if (gseControls)
+        Array.from(gseControls).forEach(gseControl => {
           inputActions.push({
-            parent: <Element>lN,
-            node: input,
-            reference: Array.from(gseControls)[-1],
+            node: gseControl!,
           });
+          lastGse = gseControl;
         });
-      }
+
+      gseControlSections.get(currentIedName)!.forEach(transferInput => {
+        // eslint-disable-next-line no-shadow
+        const { id, input } = transferInput;
+
+        inputActions.push({
+          parent: <Element>this.doc.querySelector(selector('LN0', id)),
+          node: input,
+          reference: lastGse.nextElementSibling,
+        });
+      });
+
       this.dispatchEvent(newEditEvent(inputActions));
     });
   }
